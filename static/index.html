@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Code Expert</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #d4d4d4;
+            --border-color: #404040;
+            --input-bg: #2d2d2d;
+            --accent-color: #0078d4;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .output-section {
+            margin-top: 20px;
+        }
+
+        .block {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .explanation {
+            padding: 15px;
+            background: var(--input-bg);
+        }
+
+        .code-block {
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: #2d2d2d;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .language-label {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .copy-button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: #888;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .copy-button:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        pre {
+            margin: 0;
+            padding: 15px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+        }
+
+        .tech-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .tab.active {
+            background: var(--input-bg);
+            border-color: var(--border-color);
+            border-bottom-color: var(--input-bg);
+            margin-bottom: -1px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-list {
+            margin: 10px 0;
+            padding: 10px;
+            background: var(--input-bg);
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        
+        .file-item:hover {
+            background: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Agentic Code Expert</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="switchTab('generate')">Generate Code</div>
+            <div class="tab" onclick="switchTab('analyze')">Analyze Codebase</div>
+            <div class="tab" onclick="switchTab('create')">Create File</div>
+        </div>
+        
+        <div id="generate-tab" class="tab-content active">
+            <textarea id="prompt" placeholder="Describe what you want to build (e.g., 'Create a REST API endpoint for user authentication')"></textarea>
+            <input type="text" id="technology" class="tech-input" placeholder="Specify technology (optional, e.g., 'node.js express' or 'python fastapi')">
+            <div id="context-files" class="file-list" style="display: none;"></div>
+            <button onclick="generateCode()">Generate Code</button>
+        </div>
+        
+        <div id="analyze-tab" class="tab-content">
+            <input type="text" id="directory" class="tech-input" placeholder="Directory path to analyze">
+            <textarea id="analysis-query" placeholder="What would you like to know about the codebase? (e.g., 'Review the API endpoints and suggest improvements')"></textarea>
+            <button onclick="analyzeCodebase()">Analyze Codebase</button>
+        </div>
+        
+        <div id="create-tab" class="tab-content">
+            <input type="text" id="file-path" class="tech-input" placeholder="File path (e.g., 'src/components/Button.tsx')">
+            <textarea id="file-description" placeholder="Describe the file you want to create (e.g., 'A reusable button component with variants and animations')"></textarea>
+            <button onclick="createFile()">Create File</button>
+        </div>
+        
+        <div id="output" class="output-section"></div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab and content
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+        
+        async function generateCode() {
+            const promptEl = document.getElementById('prompt');
+            const techEl = document.getElementById('technology');
+            const outputEl = document.getElementById('output');
+            
+            const prompt = promptEl.value.trim();
+            const technology = techEl.value.trim();
+            
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt,
+                        technology: technology || undefined,
+                        context_files: [] // TODO: Add file selection UI
+                    })
+                });
+                
+                const data = await response.json();
+                renderBlocks(data.blocks, outputEl);
+            } catch (error) {
+                console.error('Error:', error);
+                outputEl.innerHTML = `<div class="block explanation">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function analyzeCodebase() {
+            const directoryEl = document.getElementById('directory');
+            const queryEl = document.getElementById('analysis-query');
+            const outputEl = document.getElementById('output');
+            
+            const directory = directoryEl.value.trim();
+            const query = queryEl.value.trim();
+            
+            if (!directory || !query) {
+                alert('Please enter both directory and query');
+                return;
+            }
+            
+            try {
+                outputEl.innerHTML = '<div class="block explanation">Analyzing codebase...</div>';
+                
+                console.log('Sending request to /analyze with:', { directory, query });
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        directory,
+                        query
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('Parsed response:', data);
+                } catch (e) {
+                    console.error('Error parsing JSON:', e);
+                    outputEl.innerHTML = '<div class="block explanation">Error: Invalid JSON response from server</div>';
+                    return;
+                }
+                
+                if (!data || !data.blocks) {
+                    console.error('Invalid data structure:', data);
+                    outputEl.innerHTML = '<div class="block explanation">Error: Invalid response format from server</div>';
+                    return;
+                }
+                
+                renderBlocks(data.blocks, outputEl);
+            } catch (error) {
+                console.error('Request Error:', error);
+                outputEl.innerHTML = `<div class="block explanation">Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function createFile() {
+            const pathEl = document.getElementById('file-path');
+            const descriptionEl = document.getElementById('file-description');
+            const outputEl = document.getElementById('output');
+            
+            const path = pathEl.value.trim();
+            const description = descriptionEl.value.trim();
+            
+            if (!path || !description) {
+                alert('Please enter both file path and description');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/create-file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path,
+                        description
+                    })
+                });
+                
+                const data = await response.json();
+                renderBlocks(data.blocks, outputEl);
+            } catch (error) {
+                console.error('Error:', error);
+                outputEl.innerHTML = `<div class="block explanation">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function renderBlocks(blocks, outputEl) {
+            console.log('Rendering blocks:', blocks); // Debug log
+            outputEl.innerHTML = '';
+            
+            if (!blocks || !Array.isArray(blocks)) {
+                console.error('Invalid blocks data:', blocks); // Debug log
+                outputEl.innerHTML = '<div class="block explanation">Error: Invalid response format</div>';
+                return;
+            }
+            
+            blocks.forEach(block => {
+                if (!block || !block.type) {
+                    console.error('Invalid block:', block); // Debug log
+                    return;
+                }
+                
+                if (block.type === 'explanation') {
+                    const div = document.createElement('div');
+                    div.className = 'block explanation';
+                    div.innerHTML = marked.parse(block.content || '');
+                    outputEl.appendChild(div);
+                } else if (block.type === 'code') {
+                    const div = document.createElement('div');
+                    div.className = 'block code-block';
+                    
+                    const header = document.createElement('div');
+                    header.className = 'code-header';
+                    
+                    const langLabel = document.createElement('span');
+                    langLabel.className = 'language-label';
+                    langLabel.textContent = block.language || 'text';
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-button';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.onclick = () => {
+                        navigator.clipboard.writeText(block.content || '');
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+                    };
+                    
+                    header.appendChild(langLabel);
+                    header.appendChild(copyBtn);
+                    div.appendChild(header);
+                    
+                    const pre = document.createElement('pre');
+                    const code = document.createElement('code');
+                    code.className = `language-${block.language || 'text'}`;
+                    code.textContent = block.content || '';
+                    pre.appendChild(code);
+                    div.appendChild(pre);
+                    
+                    outputEl.appendChild(div);
+                    hljs.highlightElement(code);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
