@@ -22,8 +22,7 @@ Follow these steps to get started:
 **1. Install Dependencies**
 Run the following command to install the required dependencies:
 
-bash
-Copy code
+
 **pip install -r requirements.txt**
 **2. Configure LM-Studio**
 **Ensure the following steps are completed:**
@@ -34,7 +33,6 @@ Note the API endpoint (default: **http://localhost:1234/v1**).
 3. Run the Application
 **Start the application using:**
 
-bash
 **uvicorn main:app --reload**
 **🛠️ Usage**
 The application provides several endpoints for various development needs:
